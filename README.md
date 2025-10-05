@@ -13,6 +13,12 @@ This project implements a minimal RAG service with:
 - **Two index configurations** with comparative analysis
 - **Lightweight monitoring** with latency and drift tracking
 
+## 🏗️ Architecture
+
+![RAG Pipeline Architecture](assets/rag-pipeline-arch.png)
+
+The architecture follows a clean vertical flow from client request through guardrails, retrieval engine, and answer generation, with supporting components for monitoring, vector storage, and configuration.
+
 ## 🚀 Quick Start
 
 ### Installation
@@ -332,39 +338,27 @@ See **[CONFIG_GUIDE.md](CONFIG_GUIDE.md)** for all configuration options.
        alert("Low retrieval diversity - consider corpus update")
    ```
 
-## 🏗️ Architecture
+## 🏗️ Architecture Details
+
+See the [Architecture Diagram](#-architecture) at the top for a visual overview.
+
+**Core Components:**
+
+- **LanceDB** - Persistent vector storage
+- **Corpus** - 15 docs on SWE practices
+- **OpenAI / SentenceTransformer embeddings** - Text vectorization
+- **Similarity computation** - Cosine/dot product
+- **Guardrail validators** - Security layers
+- **Metrics tracker** - Latency, drift monitoring
+
+**Request Flow:**
 
 ```
-┌─────────────────────────────────────────────┐
-│                 FastAPI App                  │
-│                                              │
-│  POST /answer ──┬──> Guardrails             │
-│                 │    (denylist, budget)      │
-│                 │                            │
-│                 ├──> Retrieval Engine        │
-│                 │    (cosine/dot similarity) │
-│                 │         ↓                  │
-│                 │    LanceDB Vector Store    │
-│                 │    (persistent storage)    │
-│                 │                            │
-│                 ├──> Naive Answer Generation │
-│                 │                            │
-│                 └──> Metrics Recording       │
-│                                              │
-│  GET /metrics ────> Metrics Summary          │
-│  GET /health ─────> Health Check + Stats    │
-└─────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────┐
-│              Core Components                 │
-│                                              │
-│  • LanceDB (persistent vector storage)      │
-│  • Corpus (15 docs on SWE practices)        │
-│  • SentenceTransformer embeddings           │
-│  • Similarity computation (cosine/dot)      │
-│  • Guardrail validators                     │
-│  • Metrics tracker (latency, drift)         │
-└─────────────────────────────────────────────┘
+Client → FastAPI → Guardrails → Retrieval Engine → Vector Store
+                                       ↓
+                                Answer Generation → JSON Response
+                                       ↓
+                                Metrics Recording
 ```
 
 ## 📁 Project Structure
