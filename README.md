@@ -64,9 +64,9 @@ uvicorn main:app --reload
 
 The API will be available at `http://localhost:8000`
 
-**Configuration**: The application uses **Pydantic BaseSettings** to load configuration from environment variables and `.env` files. See **[CONFIG_GUIDE.md](CONFIG_GUIDE.md)** for details.
+**Configuration**: The application uses **Pydantic BaseSettings** to load configuration from environment variables and `.env` files. 
 
-**Embeddings**: By default, the system uses **OpenAI embeddings** (`text-embedding-3-small`). You can switch to local sentence-transformers by setting `EMBEDDING_PROVIDER=sentence-transformers` in `.env`. See **[OPENAI_EMBEDDINGS_UPGRADE.md](OPENAI_EMBEDDINGS_UPGRADE.md)** for details.
+**Embeddings**: By default, the system uses **OpenAI embeddings** (`text-embedding-3-small`). You can switch to local sentence-transformers by setting `EMBEDDING_PROVIDER=sentence-transformers` in `.env`.
 
 ### Interactive API Docs
 
