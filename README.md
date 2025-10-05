@@ -17,6 +17,30 @@ This project implements a minimal RAG service with:
 
 ### Installation
 
+#### Option 1: Quick Setup with Script (Recommended)
+
+```bash
+# Make the script executable
+chmod +x run.sh
+
+# Run the setup and start script
+./run.sh
+```
+
+The script will:
+- Create a virtual environment
+- Install all dependencies
+- Start the FastAPI server automatically
+
+**Note**: You still need to configure your `.env` file with `OPENAI_API_KEY` before making API calls. Copy `env.example` to `.env` and add your key:
+
+```bash
+cp env.example .env
+# Edit .env and set your OPENAI_API_KEY
+```
+
+#### Option 2: Manual Setup
+
 ```bash
 # Install dependencies
 pip install -r requirements.txt
@@ -252,14 +276,6 @@ See **[CONFIG_GUIDE.md](CONFIG_GUIDE.md)** for all configuration options.
 3. **Better Results**: In testing, cosine similarity produced more relevant results for diverse queries
 4. **Industry Standard**: Most production RAG systems use cosine similarity for good reason
 
-**Testing Comparison:**
-
-Run the comparison script:
-```bash
-python -c "from retrieval import compare_configs; compare_configs()"
-```
-
-This shows side-by-side results for cosine vs dot product on the same query.
 
 ## 📊 Monitoring Metrics
 
@@ -315,34 +331,6 @@ This shows side-by-side results for cosine vs dot product on the same query.
    if uniqueness_ratio < 0.3:
        alert("Low retrieval diversity - consider corpus update")
    ```
-
-### Production Monitoring Stack
-
-For real deployments, integrate with:
-
-1. **Metrics Export**:
-   ```python
-   from prometheus_client import Histogram, Counter
-   
-   latency_hist = Histogram('rag_latency_seconds', 'Request latency')
-   retrieval_counter = Counter('rag_retrievals_total', 'Total retrievals', ['doc_id'])
-   ```
-
-2. **Logging**:
-   ```python
-   import structlog
-   
-   log = structlog.get_logger()
-   log.info("query_processed", 
-            query=query, 
-            latency_ms=latency, 
-            top_doc=top_doc_id)
-   ```
-
-3. **Dashboards**: Grafana, DataDog, or CloudWatch dashboards showing:
-   - Latency trends over time
-   - Retrieval diversity heatmaps
-   - Error rates and guardrail violations
 
 ## 🏗️ Architecture
 
@@ -449,6 +437,16 @@ For production deployment, consider:
    - Rate limiting per user/IP
    - Content moderation API integration
    - Query complexity analysis
+   - **Expanded Guardrail Patterns for Better Coverage**:
+     - Add more semantic attack patterns to detect evolving threats
+     - Include multilingual attack patterns (non-English prompt injections)
+     - Add patterns for indirect prompt injection via retrieved documents
+     - Detect attempts to extract training data or model capabilities
+     - Monitor for token manipulation attempts (unicode/homoglyph attacks)
+     - Add domain-specific dangerous queries (e.g., "How to bypass authentication")
+     - Regularly update pattern database from threat intelligence feeds
+     - Track and analyze guardrail bypass attempts to add new patterns
+     - Consider machine learning-based pattern generation from failed attempts
 
 4. **Monitoring**:
    - Full observability stack (Prometheus + Grafana)
@@ -465,21 +463,29 @@ For production deployment, consider:
    - Add citation extraction
    - Implement streaming responses
 
-7. **Post-Guardrails for LLM Output**:
+7. **Reranker After Vector Store Retrieval**:
+   - Add a reranking step after initial vector retrieval to improve relevance
+   - Use cross-encoder models (e.g., `cross-encoder/ms-marco-MiniLM-L-12-v2`) for better semantic matching
+   - Retrieval pipeline: Vector search (top_k=20) → Rerank → Return top 3-5
+   - Benefits: Higher precision, better handling of nuanced queries, improved answer quality
+   - Trade-off: Adds 50-200ms latency but significantly improves relevance
+   - Alternative: Use Cohere Rerank API
+
+8. **Post-Guardrails for LLM Output**:
    - Validate LLM-generated answers before returning to users
    - Check for hallucinations and off-topic responses
    - Ensure answers stay grounded in retrieved context
    - Filter harmful, biased, or inappropriate content
    - Implement factual consistency checks
 
-8. **Dockerization for Microservices**:
+9. **Dockerization for Microservices**:
    - Containerize each component (API, vector store, guardrails)
    - Create Docker Compose for local development
    - Use Kubernetes for orchestration in production
    - Implement health checks and graceful shutdown
    - Enable horizontal scaling and zero-downtime deployments
 
-9. **Better Directory Structure as Package**:
+10. **Better Directory Structure as Package**:
    - Organize code into proper Python package structure
    - Separate API, core logic, models, and utilities into modules
    - Add `__init__.py` files for proper package imports
@@ -488,7 +494,7 @@ For production deployment, consider:
    - Add `setup.py` or `pyproject.toml` for installable package
    - Enable easier testing, distribution, and reusability
 
-10. **Comprehensive Testing Suite**:
+11. **Comprehensive Testing Suite**:
    - **Unit Tests**: Test individual components (embeddings, retrieval, guardrails)
    - **Integration Tests**: Test component interactions (API + vector store)
    - **E2E Tests**: Full pipeline tests from query to answer

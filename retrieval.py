@@ -36,6 +36,10 @@ class RetrievalEngine:
        - Pros: Faster computation, no normalization overhead
        - Cons: Biased toward longer documents (higher magnitude vectors)
        - Best for: When all documents are similar length or magnitude matters
+       - IMPORTANT: Use models trained for dot product similarity (e.g., 
+         sentence-transformers models with 'dot' in the name, or models 
+         specifically documented as optimized for dot product). Many models 
+         are trained with cosine similarity and may not work well with dot product.
     
     JUSTIFIED CHOICE: COSINE SIMILARITY
     Reason: More robust for text retrieval where document lengths vary.
@@ -131,43 +135,3 @@ class RetrievalEngine:
         stats["similarity_metric"] = self.similarity_metric
         return stats
 
-
-def compare_configs(query: str = "How to improve code quality?"):
-    """
-    Compare cosine vs dot product retrieval for analysis.
-    
-    Usage: python -c "from retrieval import compare_configs; compare_configs()"
-    """
-    print("=== Comparing Retrieval Configurations ===\n")
-    print(f"Query: {query}\n")
-    
-    # Test with k=3
-    print("--- Configuration 1: Cosine Similarity, k=3 (LanceDB) ---")
-    engine_cosine = RetrievalEngine(similarity_metric="cosine")
-    results_cosine = engine_cosine.retrieve(query, top_k=3)
-    for i, doc in enumerate(results_cosine, 1):
-        print(f"{i}. [{doc['doc_id']}] Score: {doc['similarity_score']:.4f}")
-        print(f"   {doc['text'][:100]}...\n")
-    
-    print("\n--- Configuration 2: Dot Product, k=3 (LanceDB) ---")
-    engine_dot = RetrievalEngine(similarity_metric="dot")
-    results_dot = engine_dot.retrieve(query, top_k=3)
-    for i, doc in enumerate(results_dot, 1):
-        print(f"{i}. [{doc['doc_id']}] Score: {doc['similarity_score']:.4f}")
-        print(f"   {doc['text'][:100]}...\n")
-    
-    # Test with k=5
-    print("\n--- Configuration 3: Cosine Similarity, k=5 (LanceDB) ---")
-    results_k5 = engine_cosine.retrieve(query, top_k=5)
-    for i, doc in enumerate(results_k5, 1):
-        print(f"{i}. [{doc['doc_id']}] Score: {doc['similarity_score']:.4f}")
-    
-    print("\n=== Analysis ===")
-    print(f"Cosine scores are normalized: {all(abs(d['similarity_score']) <= 1 for d in results_cosine)}")
-    print(f"Dot product scores are unbounded: {any(abs(d['similarity_score']) > 1 for d in results_dot)}")
-    print("\nRecommendation: Use cosine similarity for production (better normalization)")
-    print(f"\nVector Store Stats: {engine_cosine.get_stats()}")
-
-
-if __name__ == "__main__":
-    compare_configs()
