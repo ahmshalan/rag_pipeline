@@ -230,14 +230,6 @@ MAX_QUERY_LENGTH=500
 LLM_GUARDRAIL_ENABLED=false
 OPENAI_API_KEY=sk-your-key-here  # Required if LLM enabled
 ```
-
-See **[CONFIG_GUIDE.md](CONFIG_GUIDE.md)** for all configuration options.
-
-**Learn More:**
-- 📖 **[GUARDRAILS_GUIDE.md](GUARDRAILS_GUIDE.md)** - Complete guide with configuration
-- 💡 **[GUARDRAILS_EXAMPLES.md](GUARDRAILS_EXAMPLES.md)** - Copy-paste examples
-- 🧪 **[test_guardrails.py](test_guardrails.py)** - Test suite
-
 ## 🔍 Index Configuration Comparison
 
 ### Configuration 1: Cosine Similarity (DEFAULT ✓)
@@ -365,8 +357,9 @@ Client → FastAPI → Guardrails → Retrieval Engine → Vector Store
 
 ```
 rag_pipeline/
+├── assets/                     # assets directory 
 ├── main.py                    # FastAPI application and endpoints
-├── retrieval.py               # Retrieval engine with similarity configs
+├── retrieval.py               # Retrieval engine with similarity 
 ├── vector_store.py            # LanceDB vector store integration
 ├── corpus.py                  # Text corpus (15 documents)
 ├── guardrails.py              # Security and resource guardrails
@@ -374,10 +367,6 @@ rag_pipeline/
 ├── config.py                  # Configuration settings
 ├── requirements.txt           # Python dependencies
 ├── README.md                  # This file
-├── LANCEDB_INTEGRATION.md     # LanceDB integration guide
-├── DESIGN_DECISIONS.md        # Technical decision justifications
-├── EXAMPLES.md                # API usage examples
-├── test_api.py                # Example API tests
 ├── run.sh                     # Quick start script
 └── data/                      # LanceDB storage (auto-created)
     └── lancedb/               # Vector database files
